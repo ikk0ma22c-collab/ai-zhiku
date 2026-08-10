@@ -1,0 +1,22 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "reportUnboundVariable": "none",
+  "reportUndefinedVariable": "none",
+  "reportSelfClsParameterName": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportIncompatibleMethodOverride": "none",
+  "reportArgumentType": "none",
+  "include": [
+    "src"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "src",
+      "extraPaths": [
+        ".",
+        "src"
+      ]
+    }
+  ]
+}

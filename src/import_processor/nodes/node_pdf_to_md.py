@@ -1,7 +1,16 @@
-from src.import_processor.base import BaseNode
+from src.import_processor.base import BaseNode, setup_logging
 from src.import_processor.state import ImportGraphState
+from src.import_processor.exceptions import FileProcessingError, ConfigurationError, PdfConversionError
 import os
+import json
+import logging
+import shutil
+import time
+import zipfile
+import requests
 from dotenv import load_dotenv
+from pathlib import Path
+
 load_dotenv()
 
 
@@ -26,10 +35,13 @@ class NodePDFToMD(BaseNode):
         zip_url = self._step_2_upload_and_poll(pdf_path_obj)
 
         # 步骤3：下载ZIP包并提取MD文件
-
+        md_path = self._step_3_download_and_extract(zip_url, output_dir_obj, pdf_path_obj.stem)
         # 步骤4：读取md的内容
-
+        with open(md_path, "r", encoding="utf-8") as f:
+            md_content = f.read()
         # 步骤5：更新state状态
+        state["md_path"] = str(md_path)
+        state["md_content"] = md_content
         return state
     def _step_1_validate_paths(self, state: ImportGraphState):
         """
@@ -70,7 +82,7 @@ class NodePDFToMD(BaseNode):
         返回：解析结果ZIP包下载链接full_zip_url
         异常：ValueError(配置缺失)、RuntimeError(请求/上传失败)、TimeoutError(任务超时)
         """
-        base_url=os.getenv("MINERU_BASE_URL"),
+        base_url=os.getenv("MINERU_API_URL")
         api_token=os.getenv("MINERU_API_TOKEN")
         # 1、配置文件校验
         if not base_url:
@@ -171,3 +183,63 @@ class NodePDFToMD(BaseNode):
             else:
                 self.logger.info(f"【任务轮询】处理中... 已耗时{int(elapsed_time)}s，状态：{data_state}， batch_id：{batch_id}")
                 time.sleep(poll_interval)
+    def _step_3_download_and_extract(self, zip_url: str, output_dir_obj: Path, pdf_stem: str) -> str:
+        """
+       步骤3：下载MinerU解析结果ZIP包并解压，提取目标MD文件
+       核心流程：下载ZIP → 清理旧目录并解压 → 查找MD文件 → 重命名统一为PDF同名
+       参数：zip_url-ZIP包下载链接；output_dir_obj-输出目录Path；pdf_stem-PDF无后缀纯名称
+       返回：最终MD文件的字符串格式绝对路径
+       异常：RuntimeError(下载失败)、FileNotFoundError(无MD文件)
+       """
+
+        # 1、下载ZIP包
+        self.logger.info(f"【ZIP下载】开始下载ZIP包：{zip_url} ...")
+        response = requests.get(zip_url)
+
+        # 对响应结果进行校验
+        if response.status_code != 200:
+            raise RuntimeError(f"【ZIP下载】ZIP包下载失败：状态码：{response.status_code}，响应结果：{response}")
+
+        # 拼接ZIP包保存路径并保存
+        zip_save_path = output_dir_obj / f"{pdf_stem}_result.zip"
+        with open(zip_save_path, "wb") as f:
+            f.write(response.content)
+        self.logger.info(f"【ZIP下载】ZIP包下载成功：保存路径：{zip_save_path}")
+
+
+        # 2. 如果目标文件夹已存在，先删除（确保环境干净）
+        extract_target_dir = output_dir_obj / pdf_stem
+        if extract_target_dir.exists():
+            shutil.rmtree(extract_target_dir)
+        self.logger.info(f"【ZIP解压】已清空旧的解压目录：{extract_target_dir}")
+
+        # 3、创建解压目录
+        extract_target_dir.mkdir(parents=True, exist_ok=True)
+
+        # 4、解压
+        self.logger.info(f"【ZIP解压】开始解压ZIP包：{output_dir_obj} ...")
+        with zipfile.ZipFile(zip_save_path, "r") as zip_file_obj:
+            zip_file_obj.extractall(extract_target_dir)
+        self.logger.info(f"【ZIP解压】ZIP解压完成，解压目录：{extract_target_dir}")
+
+        # 5、重命名
+        self.logger.info(f"【MD重命名】找到MinerU生成的full.md文件")
+        target_md_file = extract_target_dir / "full.md"
+        self.logger.info(f"【MD重命名】开始将full.md文件进行重命名")
+        new_md_path = target_md_file.with_name(f"{pdf_stem}.md")
+        target_md_file.rename(new_md_path)
+        self.logger.info(f"【MD重命名】重命名成功，文件名：{pdf_stem}.md")
+
+        return str(new_md_path.absolute())
+if __name__ == "__main__":
+
+    setup_logging()
+
+    init_state = {
+        "pdf_path": r"D:\资料笔记\doc\hak180产品安全手册.pdf",
+        "file_dir": r"D:\output"
+    }
+    node_pdf_to_md = NodePDFToMD()
+    result = node_pdf_to_md(init_state)
+
+    logging.getLogger().info(json.dumps(result, ensure_ascii=False, indent=4))

@@ -88,9 +88,8 @@ class ImportConfig:
 
 
     # ==================== 全局单例 ====================
-    _config: Optional[ImportConfig] = None
-
-    def get_config() -> ImportConfig:  
+_config: Optional[ImportConfig] = None
+def get_config() -> ImportConfig:  
         """获取全局配置实例"""
         global _config
         if _config is None:

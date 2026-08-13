@@ -423,22 +423,3 @@ class NodeMDImg(BaseNode):
         self.logger.info(f"处理后MD文件已保存，新文件路径：{new_md_file_name}")
 
         return new_md_file_name
-
-if __name__ == "__main__":
-
-    setup_logging()
-
-    md_path = r"D:\output\hak180产品安全手册\hak180产品安全手册.md"
-    with open(md_path, "r", encoding="utf-8") as f:
-        md_content = f.read()
-
-    init_state = {
-        "md_path": md_path,
-        "md_content": md_content
-    }
-
-    # 执行核心处理流程
-    node_md_img = NodeMDImg()
-    result = node_md_img(init_state)
-
-    logging.getLogger().info(json.dumps(result, ensure_ascii=False, indent=4))

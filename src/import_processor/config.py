@@ -65,7 +65,10 @@ class ImportConfig:
         default_factory=lambda: os.getenv("MINIO_SECRET_KEY", "")
     )
     minio_bucket_name: str = field(
-        default_factory=lambda: os.getenv("MINIO_BUCKET", "")
+        default_factory=lambda: os.getenv("MINIO_BUCKET_NAME", "")
+    )
+    minio_img_dir: str = field(
+        default_factory=lambda: os.getenv("MINIO_IMG_DIR", "")
     )
     minio_secure: bool = False
     # ==================== 向量配置 ====================

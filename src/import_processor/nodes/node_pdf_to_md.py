@@ -231,15 +231,3 @@ class NodePDFToMD(BaseNode):
         self.logger.info(f"【MD重命名】重命名成功，文件名：{pdf_stem}.md")
 
         return str(new_md_path.absolute())
-if __name__ == "__main__":
-
-    setup_logging()
-
-    init_state = {
-        "pdf_path": r"D:\资料笔记\doc\hak180产品安全手册.pdf",
-        "file_dir": r"D:\output"
-    }
-    node_pdf_to_md = NodePDFToMD()
-    result = node_pdf_to_md(init_state)
-
-    logging.getLogger().info(json.dumps(result, ensure_ascii=False, indent=4))

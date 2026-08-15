@@ -9,8 +9,8 @@ from src.import_processor.base import BaseNode, setup_logging
 setup_logging()
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
-from src.utils.embedding_utils import generate_embeddings   
-from src.utils.milvus_utils import get_milvus_client, escape_milvus_string
+from utils.embedding_utils import generate_embeddings   
+from utils.milvus_utils import get_milvus_client, escape_milvus_string
 
 class NodeItemNameRecognition(BaseNode):
     """

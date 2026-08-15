@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 from minio import Minio
 from minio.deleteobjects import DeleteObject
 from openai import OpenAI
-from src.utils.minio_utils import get_minio_client
+from utils.minio_utils import get_minio_client
 
 #from config.lm_config import lm_config
 #from config.minio_config import minio_config

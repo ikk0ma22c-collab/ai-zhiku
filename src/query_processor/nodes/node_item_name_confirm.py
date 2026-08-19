@@ -288,29 +288,32 @@ class NodeItemNameConfirm(NodeBase):
             high = [m for m in matches if m.get("score", 0) > 0.85]
             # 筛选中置信度匹配结果：评分≥0.6（仅高置信度为空时生效）
             mid = [m for m in matches if m.get("score", 0) >= 0.6]
-
+            if len(high) > 0:
+                for m in high:
+                    confirmed_item_names.append(m.get("item_name"))
+                continue
             # 规则a: 只有一个高置信度结果（>0.85）→ 直接确认该商品名
-            if len(high) == 1:
-                confirmed_item_names.append(high[0].get("item_name"))
-                continue  # 匹配到规则a，跳过后续规则判断
+            #if len(high) == 1:
+                #confirmed_item_names.append(high[0].get("item_name"))
+                #continue  # 匹配到规则a，跳过后续规则判断
 
             # 规则b: 多条高置信度结果（>0.85）
-            if len(high) > 1:
+            #if len(high) > 1:
                 # 初始化选中结果为None，优先匹配原始提取名
-                picked = None
+                #picked = None
                 # 若原始提取名非空，优先取与原始名相同的匹配结果
-                if extracted_name:
-                    for m in high:
-                        if m.get("item_name") == extracted_name:
-                            picked = m
-                            break
+                #if extracted_name:
+                    #for m in high:
+                        #if m.get("item_name") == extracted_name:
+                            #picked = m
+                            #break
                 # 如果没有与原始名相同的结果，则取分数最高的第一个结果
-                if not picked:
-                    picked = high[0]
+                #if not picked:
+                    #picked = high[0]
 
                 # 将选中的结果加入确认商品名列表
-                confirmed_item_names.append(picked.get("item_name"))
-                continue  # 匹配到规则b，跳过后续规则判断
+                #confirmed_item_names.append(picked.get("item_name"))
+                #continue  # 匹配到规则b，跳过后续规则判断
 
             # 规则c: 无0.85分以上结果，取≥0.6分的最高前5个作为候选
             # 注：高置信度列表high为空时才会走到此处（规则a/b均不满足）

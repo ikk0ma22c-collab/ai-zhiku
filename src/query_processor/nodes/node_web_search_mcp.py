@@ -52,8 +52,8 @@ class NodeWebSearchMcp(NodeBase):
         search_mcp = MCPServerStreamableHttp(
             name="search_mcp",
             params={
-                "url": mcp_config.mcp_base_url,
-                "headers": {"Authorization": f"Bearer {mcp_config.api_key}"},
+                "url": os.getenv("MCP_BASE_URL"),
+                "headers": {"Authorization": f"Bearer {os.getenv('MCP_API_KEY')}"},
                 "timeout": 10,
             },
             cache_tools_list=True,

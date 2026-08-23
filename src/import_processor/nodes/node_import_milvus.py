@@ -175,7 +175,7 @@ class NodeImportMilvus(BaseNode):
         try:
             file_title = escape_milvus_string(file_title)
             client.delete(
-                collection_name=milvus_config.chunks_collection,
+                collection_name=os.getenv("CHUNKS_COLLECTION_NAME"),
                 filter=f"file_title=='{file_title}'")
         except Exception as e:
             self.logger.error(f"Milvus 数据删除失败: {str(e)}")
@@ -199,7 +199,7 @@ class NodeImportMilvus(BaseNode):
 
         # 2. 批量插入数据
         result = client.insert(
-            collection_name=milvus_config.chunks_collection,
+            collection_name=os.getenv("CHUNKS_COLLECTION_NAME"),
             data=chunks_json_data
         )
 

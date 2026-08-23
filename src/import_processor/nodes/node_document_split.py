@@ -306,7 +306,7 @@ class NodeDocumentSplit(BaseNode):
 
             # 合并条件：1.当前块长度不足阈值 2.与下一块同父标题（同属一个原章节）
             is_current_short = len(current_chunk["content"]) < MIN_CONTENT_LENGTH
-            is_same_parent = current_chunk.get("parent_title") == sec.get("parent_title") and current_parent is not None
+            is_same_parent = current_chunk.get("parent_title") == sec.get("parent_title")
 
             if is_current_short and is_same_parent:
                 # 合并前清理：去掉下一块开头重复的父标题，避免内容冗余

@@ -2,6 +2,7 @@ import colorlog
 
 from src.import_processor.config import ImportConfig, get_config  
 from src.import_processor.exceptions import ImportProcessError
+from utils.task_utils import add_running_task, add_done_task
 
 """
 导入流程节点基类
@@ -10,10 +11,10 @@ from src.import_processor.exceptions import ImportProcessError
 """
 
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional
+from typing import Any, Mapping, TypeVar, Optional
 import logging
 
-T = TypeVar("T")  # 泛型状态类型
+T = TypeVar("T", bound=Mapping[str, Any])  # 状态需支持按字符串键读取
 
 
 class BaseNode(ABC):
@@ -68,8 +69,14 @@ class BaseNode(ABC):
             # 1. 开始准备执行节点
             self.logger.info(f"--- {self.name} 开始 ---")
 
+             # 开始：记录节点运行状态
+            add_running_task(state["task_id"], self.name)
+
+
             # 2. 执行节点
             result = self.process(state)
+            # 结束：记录节点完成状态
+            add_done_task(state["task_id"], self.name)
 
             # 3. 执行节点成功
             self.logger.info(f"--- {self.name} 完成 ---")

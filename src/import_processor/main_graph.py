@@ -94,21 +94,10 @@ class KBImportWorkflow:
         # 打印图结构（仅调试用）
         self.graph.get_graph().print_ascii()
 
-        if stream:
-            return self.graph.stream(state, stream_mode="values")
-        else:
-            return self.graph.invoke(state)
+        def run(self, state: ImportGraphState, stream: bool = False):
 
-
-if __name__ == "__main__":
-    # 定义初始状态
-    init_state = {"import_file_path": r"D:\doc\hak180产品安全手册.pdf"}
-
-    # 方式1：实例化后使用（推荐方式，可复用）
-    workflow = KBImportWorkflow()
-    for event in workflow.run(init_state, stream=True):  
-        print(f"state: {event}")
-
-    # 方式2：非流式执行
-    final_state = workflow.run(init_state, stream=False)
-    print(json.dumps(final_state, ensure_ascii=False, indent=4))
+         if stream:
+        # return self.graph.stream(state, stream_mode="values")
+          return self.graph.stream(state)
+         else:
+           return self.graph.invoke(state)
